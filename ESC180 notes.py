@@ -56,9 +56,3 @@ elif not lazy and smart and not growthmindset:
     print("Go to Economics") #runs this
 else:
     print("Go to Ryerson")
-
-'''booleans can be transformed: False are "" and 0'''
-print(bool(0)) #False
-print(bool("")) #False
-print(bool(2.3)) #True
-print(bool("LMAO")) #True
