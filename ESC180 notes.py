@@ -1,4 +1,4 @@
-##Week 1
+                                                                                            ##WEEK 1
 
 value_string = "Hewwo" #in quotes is a string
 value_int = 4           #an integer
@@ -56,3 +56,10 @@ elif not lazy and smart and not growthmindset:
     print("Go to Economics") #runs this
 else:
     print("Go to Ryerson")
+                                                                        ##WEEK 2
+'''booleans can be transformed: False are "" and 0'''
+print(bool(0)) #False
+print(bool("")) #False
+print(bool(2.3)) #True
+
+print(bool("LMAO")) #True
