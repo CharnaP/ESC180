@@ -1,0 +1,130 @@
+'''Semantic Similarity: starter code
+
+Author: Michael Guerzhoy. Last modified: Nov. 14, 2016.
+
+NOTE CHANGE THE FUNCTIONS
+'''
+
+import math
+
+def norm(vec):
+    '''Return the norm of a vector stored as a dictionary,
+    as described in the handout for Project 3.
+    '''
+    sum_of_squares = 0.0
+    for x in vec:
+        sum_of_squares += vec[x] * vec[x]
+    return sum_of_squares
+
+def cosine_similarity(vec1, vec2):
+    total_norm=math.sqrt((norm(vec1)*norm(vec2))) #denominator
+    sum_vec=0
+    for key in vec2:
+        if key in vec1:
+            #print(vec1[key])
+            #cosine calculation for each key
+            sum_vec+=(vec2[key]*vec1[key])
+    #return sum_vec/round(total_norm,10) #<<<<<<<<<<<<<<<<	Returns 100% in run
+    return sum_vec/total_norm #<<<<<<<<<<<<<<<< Returns 50% in run
+
+def build_semantic_descriptors(sentences):
+    #dictionary is built so each new word has a new mini dict
+    dictionary={}
+    L_single_manip=[]
+
+    for sent in sentences: #look at each sentance in sentances
+        '''note that list(set(sent)) takes out duplicates in sentances i.e. "sick sick man" --> "sick man" '''
+        for word_a in list(set(sent)):  #check each word in sentances
+            if word_a not in dictionary: #adds a place for word
+                dictionary[word_a] = { }
+                for word_b in set(sent):
+                    if word_b != word_a:
+                        if word_b in dictionary[word_a]:
+                            dictionary[word_a][word_b]+=1 #adds to counter if word is there
+                        else:
+                             dictionary[word_a][word_b]=1 #keeps same if word not there
+            else:
+                for word_c in set(sent):
+                    if word_c != word_a:
+                        if word_c in dictionary[word_a]:
+                            dictionary[word_a][word_c]+=1
+                        else:
+                            dictionary[word_a][word_c]=1
+    return dictionary
+
+def build_semantic_descriptors_from_files(filenames):
+    #Make a list of file names
+    file_sen =""
+    L_sen=[]
+    List=[]
+    for file in filenames: #goes through each file in filenames
+    #returning a dict with all words in a file
+        #Make it lower case
+        #take out specified punctuation
+        file_sen = open(file, "r", encoding="utf-8").read().lower()
+        file_sen = " " + file_sen + "  "
+        file_sen = file_sen.replace(","," ").replace("-"," ").replace("--"," ").replace(":"," ").replace(";"," ").replace("\n"," ")
+        #Makes end sentances periods, and splits there.
+        file_sen = file_sen.replace("!",".").replace("?",".")
+        file_sen = file_sen.split(".")[:-1] #gets rid of end []
+        file_sen = [s.strip() for s in file_sen]
+        for sentence in file_sen:
+            List.append(sentence.split())
+        builtDescriptors = build_semantic_descriptors(List)
+    return builtDescriptors
+
+def most_similar_word(word, choices, semantic_descriptors, similarity_fn):
+    #semantic_descriptors: is a dictionary
+    #choice: is a list of strings
+    #word: is a string
+    #NOT COSINE
+
+    #Make everything lower case, maybe take out if it's being called but also indi so check
+    word=word.lower()
+    choices=[x.lower() for x in choices]
+    most_similar_word = choices[0] #This is updated through each run
+    most_similiar_amount = 0.0
+
+    if word not in semantic_descriptors: #CHECK THIS (given word isn't in semantic)
+        return most_similar_word
+    word_elem = semantic_descriptors[word]
+    for i in range(len(choices)):
+        choice = choices[i]
+        if choice not in semantic_descriptors:
+            similarity = -1
+        else:
+            similarity = similarity_fn(word_elem, semantic_descriptors[choice])
+        if i == 0:
+            most_similiar_amount = similarity
+        if most_similiar_amount < similarity:
+            most_similiar_amount = similarity
+            most_similar_word = choice
+    return most_similar_word
+
+def run_similarity_test(filename, semantic_descriptors, similarity_fn):
+    #string filename
+    #semantic_descriptors dictionary
+    List=[]
+    correct_guess_counter = 0.0
+    #opens and copies file
+    file_sentances = open(filename, "r", encoding="utf-8").read().lower().split("\n")
+    #changes file into a bunch of dictionaries
+    for i in range(len(file_sentances)): #check if -1
+        #List is only one sentance
+        if file_sentances[i]!='':
+            words_in_sen = file_sentances[i].split(" ")
+            List.append(words_in_sen) #each sentance is an element in List
+    for i in range(len(List)): #for each sentance
+        first_word=List[i][0] #'word' of each sentance List[row][column]
+        definition=List[i][1]
+        choices = List[i][2:] #a list of the choices (not including definiton and word)
+        #If the second element (the definition) matches that word
+        if most_similar_word(first_word, choices, semantic_descriptors, similarity_fn) ==definition:
+            correct_guess_counter+=1
+    percentage = (correct_guess_counter/len(List))*100
+    return percentage
+
+if __name__ == "__main__":
+    s = build_semantic_descriptors_from_files(["war.txt", "swann.txt"])
+    res = run_similarity_test("test.txt", s, cosine_similarity)
+    print(res)
