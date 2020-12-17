@@ -1,0 +1,154 @@
+
+#Needed for array() and dot()
+from numpy import *
+
+##Problem 1
+def print_matrix(M_lol):
+    #Should use numpy import to convert list of lists to array
+    print(array(M_lol))
+
+## Problem 2
+def get_lead_ind(row):
+    #Should return index of first non zero elements
+    #If all elements are 0 returns length of row
+    for i in range(len(row)):
+        if not row[i] == 0:
+            return i
+    return len(row)
+
+## Problem 3
+def get_row_to_swap(M, start_i):
+    row = start_i #row number that will be swapped
+    for i in range(start_i, len(M)): #inclusive of row specified to last row
+        #Should return row where lead index is lowest
+        if get_lead_ind(M[i]) < get_lead_ind(M[row]):
+            row = i
+    return row
+
+## Problem 4
+def add_rows_coefs(r1, c1, r2, c2):
+    #New list should made wherein elements of r1 and r2 will by multiplied by respective coffecient c1 ad c2
+    new_row = []
+    for i in range(len(r1)):
+        new_row.append(r1[i] * c1 + r2[i] * c2) #Each aspect is added to end through length of r1
+    return new_row
+
+## Problem 5
+def eliminate(M, row_to_sub, best_lead_ind):
+    '''New list M_elim stores the changed matrix
+    note that row_to_sub is row to subtract from other rows to eliminate
+    best_lead_ind is index of which rows should be eliminated inclusive
+    a is the value of element at given index
+    '''
+    M_elim = [] #new matrix
+    a = M[row_to_sub][best_lead_ind] #store the value of the leading element in the row we're using to eliminate. ie: 2 in [0, 2, 1]
+    for i in range(row_to_sub + 1): #For all the rows before the row we're using
+        M_elim.append(M[i]) #add the row to the new matrix. This keeps the matrix the same above the row to use
+    for i in range(row_to_sub + 1, len(M)): #for all the rows below the row to use
+        b = M[i][best_lead_ind] #takes element starting at row i,best_lead_ind
+        c = -b/a # calculates the multiplier necessary to make b 0
+        #Using the function add_row_coefs
+        M_elim.append(add_rows_coefs(M[i], 1, M[row_to_sub], c)) #multiples the row to use by C and adds it to the row we're modifying to make b 0.
+    return M_elim
+
+##Problem 6
+def  forward_step(M):
+    '''applies forward gaus. elimination
+    a) call get_row_to swap toswap and then b) call eliminate to eliminate
+    b)Repeat
+    '''
+    print("The matrix is currently:")
+    print_matrix(M)
+    #Forward gaus. elimination goes forward through however many rows M has i.e. len(M)
+    for current_row in range(len(M)):
+        # get row to swap
+        print("Now looking at row " + str(current_row) + ".") #str() allows for + to be used
+        row_swap = get_row_to_swap(M, current_row)
+        print("Swapping row " + str(current_row) + " and row " + str(row_swap) + " so that entry " + str(get_lead_ind(M[row_swap])) + " in the current row is non-zero.")
+        # swap the row
+        temp_row = M[current_row][:] #temp_row gets the value(s) in current row and [:] makes a copy of the list
+        M[current_row] = M[row_swap][:]
+        M[row_swap] = temp_row[:]
+        print("The matrix is currently:")
+        print_matrix(M)
+        print("Adding row " + str(current_row) + " to rows below it to eliminate coefficients in column " + str(get_lead_ind(M[row_swap])) + ".")
+        # eliminate the column
+        M = eliminate(M, current_row, get_lead_ind(M[current_row]))[:][:]
+        print("The matrix is currently:")
+        print_matrix(M)
+        print("================================================================================")
+    print("Done with the forward step.")
+    print("The matrix is currently:")
+    print_matrix(M)
+    return M
+
+  ##problem 7
+def backward_step(M):
+    '''Using backwards gaus. elimination, by running the matrix 'upside down'/backwards
+    The current row current_row starts at one before length of list, 
+    ending at last row, and going in backwards steps i.e. bottom to top'''
+    for current_row in range(len(M)-1,-1,-1):
+        # get row to swap
+        print("Now looking at row " + str(current_row) + ".")
+        row_swap = get_row_to_swap(M, current_row)
+        print("Swapping row " + str(current_row) + " and row " + str(row_swap) + " so that entry " + str(get_lead_ind(M[row_swap])) + " in the current row is non-zero.")
+        # swap the row
+        temp_row = M[current_row][:] #getting the current_row 
+        M[current_row] = M[row_swap][:] #switching current row and row swap
+        M[row_swap] = temp_row[:] #switching row swap and old current row value stored in temp
+        print("The matrix is currently:")
+        print_matrix(M)
+        print("Adding row " + str(current_row) + " to rows below it to eliminate coefficients in column " + str(get_lead_ind(M[row_swap])) + ".")
+        # eliminate the column
+        M = eliminate_back(M, current_row, get_lead_ind(M[current_row]))[:][:]
+        print("The matrix is currently:")
+        print_matrix(M)
+        print("================================================================================")
+    print("Done with the backward step.")
+    return M
+
+def eliminate_back(M, row_to_sub, best_lead_ind):
+    M_elim = []
+    a = M[row_to_sub][best_lead_ind]
+    for i in range(row_to_sub): #note that unlike eliminate it is inclusive of row to sub
+        b = M[i][best_lead_ind]
+        c = -b/a
+        M_elim.append(add_rows_coefs(M[i], 1, M[row_to_sub], c)) #multiples the row to use by C and adds it to 
+                                                                 #the row we're modifying to make b 0.
+    for i in range(row_to_sub, len(M)):
+        M_elim.append(M[i]) #Adds rows through the rest of M
+    return M_elim
+
+## Problem 8
+def gaussian_elim(M, b):
+    #Solving for vector x in Mx=b that can solve the matrix
+    M_aug = [] #augmented matrix
+    for row in range(len(M)): #Runs for as many rows there are in Matrix
+        M_aug_row = M[row][:] #Copies matrix row to M_aug_row variable
+        M_aug_row.append(b[row]) #adds the correct b value (b[row]) to M_aug_row
+        M_aug.append(M_aug_row) #aug rows are then made into aug matrix
+    M_elim = backward_step(forward_step(M_aug))[:][:] #backwards step gaus. applied
+    for row in range(len(M_elim)): #for each row in the final matrix
+        current_row = M_elim[row] #select row for readability
+        lead_ind = current_row[get_lead_ind(current_row)] #find leading value
+        for i in range(len(current_row)): #divide each value in row by the leading value to get the final version with a 1 as leading.
+            current_row[i] = current_row[i] / lead_ind
+    print("Now dividing each row by the leading coefficient.")
+    print("The matrix is currently:")
+    print_matrix(M_elim)
+    print("================================================================================")
+    x = []
+    for row in M_elim: #get the x values from the augmented matrix
+        x.append(row[-1])
+    return x
+
+
+    
+if __name__ == '__main__':
+    M=[[1, -2, 3],
+    [3, 10, 1],
+    [1, 5, 3]]
+
+    b = [22, 314, 92]
+
+    print_matrix(gaussian_elim(M, b))
