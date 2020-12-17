@@ -1,0 +1,116 @@
+'''
+ X | O | X
+---+---+---
+ O | O | X
+---+---+---
+   | X |
+'''
+
+import random
+
+def print_board_and_legend(board):
+    for i in range(3):
+        line1 = " " + board[i][0] + " | " + board[i][1] + " | " + board[i][2]
+        line2 = "  " + str(3 * i + 1) + " | " + str(3 * i + 2) + " | " + str(3 * i + 3)
+        print(line1 + " " * 5 + line2)
+        if i < 2:
+            print("---+---+---" + " " * 5 + "---+---+---")
+
+
+def make_empty_board():
+    board = []
+    for i in range(3):
+        board.append([" "] * 3)
+    return board
+
+def get_coord(square_num):
+    return [(square_num-1)//3, (square_num-1)%3] #(n-1)//3 gets the row, (n-1)%3 gets the column
+
+def put_in_board(board, mark, square_num):
+    coords = get_coord(square_num) #get coords
+    board[coords[0]][coords[1]] = mark #use coords to edit the right location
+
+def next_turn():
+    global turn #Prints board and changes the turn
+    print("\n")
+    print_board_and_legend(board)
+    if turn == "x":
+        turn = "o"
+    else:
+        turn = "x"
+
+def get_free_squares(board):
+    free_squares = [] 
+    for i in range(len(board)):
+        for j in range(len(board[0])): #for each square
+            if board[i][j] == " ": #is it empty
+                free_squares.append([i, j]) #add if yes
+    return free_squares
+
+def make_random_move(board, mark):
+    free_squares = get_free_squares(board)
+    if smart_move(board, free_squares, mark): #make any winning move
+        return #end function if winning move is played
+    elif [1,1] in free_squares: #center is a good move for computer
+        square = 5
+    else: #choose random move otherwise
+        square = free_squares[int(random.random() * len(free_squares))]
+        square = square[0] * 3 + square[1] + 1 #columns go from 0 to 2 and the +1 should make it go from 1 to 3
+    put_in_board(board, mark, square) #play move
+
+def is_row_all_marks(board, row_i, mark):
+    return board[row_i] == [mark, mark, mark]
+
+def is_col_all_marks(board, col_i, mark):
+    col = []
+    for i in range(len(board)):
+        col.append(board[i][col_i]) # make column into one list
+    return col == [mark, mark, mark]
+
+
+def is_win(board, mark):
+    for i in range(0,3):
+        d1 = [board[0][0], board[1][1], board[2][2]] == [mark, mark, mark] #TL to BR Diag
+        d2 = [board[0][2], board[1][1], board[2][0]] == [mark, mark, mark] #BL to TR Diag
+        if is_row_all_marks(board, i, mark) or is_col_all_marks(board, i, mark) or d1 or d2: #are there any wins
+                return True
+    return False
+    
+def smart_move(board, squares, mark):
+    for square in squares: #for each free square
+        put_in_board(board, mark, square[0] * 3 + square[1] + 1) #try move
+        if is_win(board, mark):
+            return True #use move if it's winning
+        else: #if next move isn't a win, remove move
+            put_in_board(board, " ", square[0] * 3 + square[1] + 1)
+    return False
+
+
+
+if __name__ == '__main__':
+    board = make_empty_board()
+    print_board_and_legend(board)
+    turn = "x"
+    cmd = None
+    while not (is_win(board, "x") or is_win(board, "o") or len(get_free_squares(board)) == 0):
+        if turn == "x": #player's turn
+            cmd = int(input(turn + "'s turn. Choose a square number. \n"))
+            if cmd < 10 and cmd > 0: #is the number entered in the range 1-9
+                if get_coord(cmd) in get_free_squares(board): #prevents over-writing moves
+                    put_in_board(board, turn, int(cmd)) #make the move
+                    next_turn() #update board and turn
+                else:
+                    print("Enter an empty square number.")
+            else:
+                print("Enter a valid square number.")
+        elif turn == "o": #computer's turn
+            print(turn + "'s turn. Choose a square number.")
+            make_random_move(board, turn)
+            next_turn()
+    if is_win(board, "x"):
+        print("X wins! woo")
+    elif is_win(board, "o"):
+        print("O wins! woo")   
+    else:
+        print("Draw! boo")
+            
