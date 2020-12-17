@@ -1,0 +1,49 @@
+import random as r
+#Part 1
+text = open("pandp.txt", encoding="latin-1").read().split()
+
+word_counts = {}
+for word in text:
+    if word in word_counts:
+        word_counts[word] += 1
+    else:
+        word_counts[word] = 1
+#print(word_counts)
+
+def top10(L):
+    
+    return sorted(L, reverse=True)[0:10]
+
+#part c
+word_counts_sorted = sorted(word_counts, key=word_counts.get, reverse=True)
+print(word_counts_sorted[:10])
+
+#Part 2 is in Hello, World.html
+
+#Part 3
+import urllib.request
+f = urllib.request.urlopen("https://ca.search.yahoo.com/search?p=engineering+science")
+page = f.read().decode("utf-8")
+f.close()
+#print(page)
+
+def search_results(search):
+    f = urllib.request.urlopen("https://ca.search.yahoo.com/search?p="+str("+".join(search.split(" "))))
+    page = f.read().decode("utf-8")
+    f.close()
+    spans = page.split("results</span>")
+    #starting far enough back (-30 characters) to capture the number and <span> but not far back enough to capture a second <span>
+    #<span> is used to split again 
+    return (spans[0][-30:-1]).split("<span>")[-1]
+print(search_results("engineering"))
+
+def choose_variant(variants):
+    results = {}
+    for phrase in variants:
+        results[phrase] = search_results(phrase)
+    return sorted(results, key=results.get, reverse=True)[0]
+    
+
+    
+print(choose_variant(["top ranked school uoft", "top ranked school waterloo"]))
+
