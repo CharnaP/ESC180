@@ -1,0 +1,183 @@
+
+def initialize():
+    '''Should initialize the global variables needed for the simulation i.e. reset them
+    '''
+
+    global cur_hedons, cur_health
+
+    global cur_time
+    global last_activity, last_activity_duration
+
+    global last_finished
+    global tired
+    global bored_with_stars
+    global last_activity_time
+    global cur_star_offer
+    global cur_star
+    global run_time
+    global running_time_limit
+
+    cur_hedons = 0
+    cur_health = 0
+
+    cur_star = 0
+    cur_star_offer = None
+
+    bored_with_stars = False
+
+    last_activity = "resting"
+    last_activity_duration = 0
+
+    cur_time = 0
+    last_activity_time=1000000
+    run_time=0
+
+
+def tired():
+    '''Return True if last_activity was not resting or last activity is less than 120, return False otherwise
+    '''
+    if last_activity!="resting" or last_activity_time<120:
+        return True
+    else:
+        return False
+
+
+def star_can_be_taken(activity):
+    '''Return True iff cur_star_offer matches activity and bored_with_stars is untrue
+    assumption is activity is "textbooks","running", or "resting"
+
+    Argument:
+    activity -- string
+    '''
+    global cur_star
+    if cur_star_offer == activity and not bored_with_stars:
+        return True
+    else:
+        return False
+
+
+def offer_star(activity):
+    '''Offers the user a star for engaging in activity. bored_with_stars returns True iff the amount of stars offered
+    is >=3 and cur_time is less than 120. Adds a star if activity is engaged within 120 of the last.
+    assumption is activity is "textbooks","running", or "resting"
+
+    Argument:
+    activity -- string
+    '''
+    global cur_star, cur_star_offer, bored_with_stars
+    cur_star_offer = activity
+    if cur_time-last_activity_time<120:
+        cur_star+=1
+    if cur_star>=3 and cur_time<120:
+        bored_with_stars = True
+
+
+def perform_activity(activity, duration):
+    '''Perform activity for duration minutes, if the star can be taken is True then more hedons are given, after
+    perform activity star_can_be_taken is reset as none.
+
+    Arguments:
+    activity, duration --- string and int [note duration can be a float too]
+    '''
+    global cur_time, cur_health, cur_hedons, last_activity, last_activity_time, cur_star, run_time, cur_star_offer, running_time_limit
+
+    if star_can_be_taken(activity)==True:
+        cur_hedons += min(10 * 3, duration * 3)
+
+    if activity == "running":
+        running_time_limit=max(180-run_time,0)
+
+        #health points gained from "running" activity
+        if duration>running_time_limit:
+            cur_health+=running_time_limit*3
+        else:
+
+            cur_health+=duration*3
+        if 0<duration-running_time_limit:
+            cur_health+=duration-running_time_limit
+        run_time+=duration
+
+        #hedon points gained from "running" activity
+        if tired()==True:
+            cur_hedons += -2 *(duration)
+        else:
+            cur_hedons+= 2 * 10
+            if duration > 10:
+                cur_hedons+=-2*(duration-10)
+        last_activity="running"
+        last_activity_time=0
+
+    elif activity == "textbooks":
+        #Health and hedon points gained from "textbooks" activity
+        cur_health+=2*duration
+        if tired()==True:
+            cur_hedons+=duration*(-2)
+        else:
+            if duration<20:
+                cur_hedons+=duration
+            else:
+                cur_hedons+=20
+                cur_hedons-=(duration-20)
+        last_activity = "textbooks"
+        last_activity_time=0
+        run_time=0
+
+    elif activity == "resting":
+        last_activity="resting"
+        last_activity_time+=duration
+        run_time=0
+
+    else:
+        pass
+
+    cur_time += duration
+    cur_star_offer = None
+
+
+def most_fun_activity_minute():
+    '''Calculates the activity that gives the most hedons per minute at that time
+    '''
+    if last_activity_time < 120:
+        if star_can_be_taken("running")==True:
+            return "running"
+        elif star_can_be_taken("textbooks")==True:
+            return "textbooks"
+        else:
+            return "resting"
+
+    elif star_can_be_taken("textbooks")==True:
+        return "textbooks"
+    else:
+        return "running"
+
+def get_cur_hedons():
+    return cur_hedons
+
+def get_cur_health():
+    return cur_health
+
+
+################################################################################
+if __name__ == '__main__':
+    initialize()
+    perform_activity("running", 30)
+    print(get_cur_hedons())  # -20 = 10 * 2 + 20 * (-2)
+    print(get_cur_health())  # 90 = 30 * 3
+    print(most_fun_activity_minute())  # resting
+    perform_activity("resting", 30)
+    offer_star("running")
+
+    print(most_fun_activity_minute())  # running
+    perform_activity("textbooks", 30)
+
+    print(get_cur_health())  # 150 = 90 + 30*2
+    print(get_cur_hedons())  # -80 = -20 + 30 * (-2)
+    offer_star("running")
+
+    perform_activity("running", 20)
+    print(get_cur_health())  # 210 = 150 + 20 * 3
+
+    print(get_cur_hedons())  # -90 = -80 + 10 * (3-2) + 10 * (-2)
+    perform_activity("running", 170)
+    print(get_cur_health())  # 700 = 210 + 160 * 3 + 10 * 1
+    print(get_cur_hedons())  # -430 = -90 + 170 * (-2)
