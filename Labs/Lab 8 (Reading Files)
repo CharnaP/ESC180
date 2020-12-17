@@ -1,0 +1,133 @@
+import re
+
+# Problem 1
+'''open() opens a file, and returns it as a file object, f.read() reads the content of the file'''
+f = open("data2.txt")
+text = f.read()
+# text is a string that contains the contents of the entire file
+''' text.split("\n") splits the text by each new line, string.split(separator), lower makes it lower case'''
+text = text.lower().split("\n")
+
+# Problem 2
+"""Return a str containing each key and value in dict d. Keys and
+values are separated by a comma. Key-value pairs are separated
+by a newline character from each other.
+For example, dict_to_str({1:2, 5:6}) should return "1, 2\n5, 6".
+(the order of the key-value pairs doesn’t matter and can be different
+every time).
+"""
+#dic_example={"key1":'value1', "key2":"value2"}
+#print(dic_example['key1]) #output gives the value of that key
+
+dict_test = {1: 2, 3: 2, 12: 4, 4: 5}
+
+def dict_to_str(d):
+    """Return a str containing each key and value in dict d. Keys and
+    values are separated by a comma. Key-value pairs are separated
+    by a newline character from each other.
+    For example, dict_to_str({1:2, 5:6}) should return "1, 2\n5, 6".
+    (the order of the key-value pairs doesn’t matter and can be different
+    every time).
+    """
+    rtn_str = ""
+    for key in d:
+        #gets the string key and the value there, makes new line
+        rtn_str += str(key) + ", " + str(d[key]) + "\n"
+    return rtn_str[:-1] #iterates back up the list
+print(dict_to_str(dict_test))
+
+# Problem 3
+
+def dict_to_str_sorted(d):
+    """Return a str containing each key and value in dict d. Keys and
+    values are separated by a comma. Key-value pairs are separated
+    by a newline character from each other, and are sorted in
+    ascending order by key.
+    For example, dict_to_str_sorted({1:2, 0:3, 10:5}) should
+    return "0, 3\n1, 2\n10, 5". The keys in the string must be sorted
+    in ascending order."""
+    keys_list = []
+    for key in d:
+        keys_list.append(key) #list of all keys in dictionary d
+    keys_list.sort() #sorts the list
+    rtn_str = ""
+    for key in keys_list:
+        rtn_str += str(key) + ", " + str(d[key]) + "\n"
+    return rtn_str[:-1]
+
+
+# print("")
+# print(dict_to_str_sorted(d))
+
+# Problem 4a
+f = open("words.txt")
+# e.g., f = open("data2.txt")
+words = f.read() #stores file contents as string called words
+words = words.lower().split("\n")
+
+word_phone_dict = {}
+for line in words:
+    if "  " in line:
+        line = re.sub("[^a-z\s]", "", line)  # removes all non-letter/space characters in the text
+                                            # matches a single whitespace character -
+        line = line.split("  ")
+        #line[0] is all the words,
+        #line[1] is all the categories after it
+        word_phone_dict[line[0]] = line[1].split(" ")
+
+#print(dict_to_str(word_phone_dict))
+
+# Problem 4b
+f = open("phones.txt")
+# e.g., f = open("data2.txt")
+phones = f.read()
+# text is a string that contains the contents of the entire file
+phones = phones.lower().split("\n")
+
+phone_type_dict = {}
+for line in phones:
+    if "\t" in line: #\t is a tab
+        line = line.split("\t")
+        phone_type_dict[line[0]] = line[1]
+#print(phone_type_dict)
+
+
+# Problem 4c
+def vowel_count(word):
+    return len(word) - len(word.lower().translate({ord(i): None for i in 'aeiouy'}))  # length of the word - the length of the word without vowels.
+
+
+# Problem 4d
+def syllable_count(word):
+    count = 0
+    for phone in word_phone_dict[word]:
+        if phone_type_dict[phone] == "vowel":
+            count += 1
+    return count
+
+
+# print(vowel_count("zuckerberg"))
+
+# Problem 5
+def readability(textfile):
+    file = open(textfile)
+    test_text = file.read()
+    # word count
+    word_list = (" ".join(test_text.lower().split("\n")))  # set into one line
+    word_list = re.sub(r"-", " ", word_list)  # replace hyphens with a space
+    word_list = re.sub("[^a-z\s]", "", word_list).split(" ")  # remove punctuation
+    word_list = list(word for word in word_list if word != "")  # remove null words
+    # sentence count
+    sentence_list = test_text.split(".")  # doesn't work with ellipses but who cares
+    # syllable count
+    total_syllables = 0
+    for word in word_list:
+        if word in word_phone_dict:
+            total_syllables += syllable_count(word)
+        else:
+            print("Unknown word: " + word + ". Assumed to have 2 syllables.")
+            total_syllables += 2  # if it's not in the list, just assume it has 2. Pretty safe bet imo
+    return 0.39 * (len(word_list) / len(sentence_list)) + 11.8 * (total_syllables / len(word_list)) - 15.59
+
+
+#print(readability("reading.txt"))
