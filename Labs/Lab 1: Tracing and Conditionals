@@ -1,0 +1,16 @@
+## Problem 2 Trace through file
+
+print("Hello, Hermione Granger \n Hello, Harry Potter")
+
+## Problem 3
+name1 = "Harry Potter"
+name2 = "Hermione Granger"
+ames = name1 + " and " + name2
+
+print("Hello, " + names + ". Your names are " + names +  ". Hi there. Your names are still " + names + ".")
+
+greetee = "Lord Voldermort"
+if greetee == "Lord Voldermort":
+    print("I am not talking to you")
+else:
+    print("Hello, " + greetee)
