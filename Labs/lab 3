@@ -1,0 +1,86 @@
+##Problem 1: Importing
+import lab02
+
+## Problem 2: Sums of Cubes
+def sum_of_cubes(a):
+    sum=0
+    for i in range (1, a+1):
+        sum+=i*i*i
+    return sum
+
+def sum_of_cube_formula(m):
+    sum=0
+    for i in range (1, m+1):
+        sum=(((i)*(i+1))/2)**2
+    return int(sum)
+
+def check_sum(n):
+    return sum_of_cubes(n) == sum_of_cube_formula(n)
+
+def check_sums_up_to_n(N):
+    global n
+    while n<=N:
+        #print("At term", n, "the sum of cubes is", sum_of_cubes(n))
+        #print("This is", check_sum(n), "for both summation options\n")
+        if check_sum(n) == False:
+            return False
+        n=n+1
+    return True
+
+## problem 3 π
+def leibniz(L):
+    sum=0
+    for i in range(0, L):
+        sum+=(4.0*(-1)**i/(2*i+1))
+    return sum
+    
+if __name__ == '__main__':
+    #problem 1, testing cases
+    lab02.initialize()
+    lab02.add(42)
+    if lab02.get_current_value() == 42:
+      print("Test 1 passed")
+    else:
+      print("Test 1 failed")
+    lab02.subtract(12)
+    if lab02.get_current_value() == 30:
+      print("Test 2 passed")
+    else:
+      print("Test 2 failed")
+    lab02.multiply(4)
+    if lab02.get_current_value() == 120:
+      print("Test 3 passed")
+    else:
+      print("Test 3 failed")
+    lab02.divide(2)
+    if lab02.get_current_value() == 60:
+      print("Test 4 passed")
+    else:
+      print("Test 4 failed")
+    lab02.add(-18)
+    if lab02.get_current_value() == 42:
+      print("Test 5 passed")
+    else:
+      print("Test 5 failed")
+    lab02.divide(0)
+    if lab02.get_current_value() == "ERROR":
+      print("Test 6 passed")
+    else:
+      print("Test 6 failed")
+    lab02.undo()
+    if lab02.get_current_value() == 42:
+      print("Test 7 passed")
+    else:
+      print("Test 7 failed")
+
+    #problem 2
+    n=1
+    N=5
+    if n<N:
+        print("Check sums up to", N, ":", check_sums_up_to_n(N))
+    else:
+        print("Give an n that is lower than N")
+
+    #problem 3 pi estimation
+    print(leibniz(1000))
+
