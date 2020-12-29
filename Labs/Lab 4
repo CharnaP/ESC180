@@ -1,0 +1,94 @@
+## Part 1
+def count_evens(L):
+    counter = 0
+    for j in range(len(L)):
+        if L[j]%2==0:
+            counter+=1 #if even add one
+    return counter
+       
+## Part 2
+def list_to_str(lis):
+    string = "["
+    for i in range(len(lis)):
+        string += str(lis[i])
+        if i < len(lis)-1:
+            string += ", "
+    string += "]"
+    return string
+
+## Part 3
+def lists_are_the_same(list1, list2):
+    if len(list1)==len(list2):
+        for x in range(len(list1)):
+            if list1[x]!=list2[x]:
+                return False
+        return True
+    else:
+        return False
+
+## Part 4
+def simplify_fraction(n, m):
+    x = min(n,m)
+    while x > 1:
+        if m % x == 0 and n % x == 0:
+            return str(n//x) + "/" + str(m//x)
+        x -= 1
+    return str(n) + "/" + str(m)
+
+## Part 5
+import math
+
+def leibniz(L):
+    sum=0
+    for i in range(0, L):
+        sum+=(4.0*(-1)**i/(2*i+1))
+    return sum
+
+def pi_to_n_loop(n):
+    pi = int(math.pi * 10**n)
+    L = 1
+    while pi != int(leibniz(L) * 10**n):
+        L+=1
+    return L
+
+def pi_to_n_term(n):
+    L = 1
+    while 10**(-n) < abs(4.0 * (-1)**L / (2 * L + 1)):
+        L += 1
+    return L
+
+## Problem 6 Euclids
+
+#as+bt=gcd(a, b)
+def euclid_gcd(n,m):
+    a = max(n,m)
+    b = min(n,m)
+    r = a % b
+    if r == 0:
+        return b
+    return euclid_gcd(b, r)
+
+def simplify_euclid(n,m):
+    x = euclid_gcd(n,m)
+    return str(n//x) + "/" + str(m//x)
+       
+
+if __name__ == "__main__":
+    L=[1,2,3,4,5]
+    K=[1,2,3,4,5,6]
+    J=[1,2,3,4,4]
+    n=8
+    m=5
+    print(count_evens(L))
+    print(list_to_str(L))
+    print(lists_are_the_same(L,K))
+    print(lists_are_the_same(L,J))
+    print(lists_are_the_same(L,L))
+    
+    print(simplify_fraction(n, m))
+    print(simplify_euclid(n, m))
+
+    print(pi_to_n_loop(3), leibniz(pi_to_n_loop(3)))
+    print(pi_to_n_term(3), leibniz(pi_to_n_term(3)))
+
+    print(pi_to_n_term(5), leibniz(pi_to_n_term(5)))
