@@ -1,0 +1,57 @@
+def save(): #saves value every operation NOTE NO RETURN AS THE CHANGE IS INTERNAL
+    global saved_value
+    saved_value = current_value
+
+def undo(): #swaps current and saved values, so undo can be undone
+    global current_value, saved_value
+    temp = saved_value
+    saved_value = current_value
+    current_value = temp
+
+def add(to_add):
+    global current_value
+    save()
+    current_value += to_add
+
+def sub(to_sub):
+    global current_value
+    save()
+    current_value -= to_sub
+
+def mult(to_mult):
+    global current_value
+    save()
+    current_value *= to_mult
+
+def divide(to_divide):
+    global current_value
+    if to_divide == 0:
+        return #Cancels any division by zero. Not sure how to return
+    save()
+    current_value = int(current_value/to_divide) #casts to int to avoid messiness
+
+def display_current_value():
+    print("Current Value: ", current_value)
+
+if __name__ == "__main__":
+    current_value = 0
+    print("Welcome to the calculator program.\n")
+    display_current_value() # 0
+    add(5) # 5
+    sub(2) # 3
+    display_current_value() # 3
+    undo()
+    display_current_value() # 5
+    undo()
+    display_current_value() # 3
+    mult(10)
+    display_current_value() # 30
+    undo()
+    undo()
+    display_current_value() # 30
+    undo()
+    undo()
+    undo()
+    display_current_value() # 3
+    divide(3)
+    display_current_value() # 1
